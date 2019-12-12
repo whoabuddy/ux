@@ -5,6 +5,7 @@ module.exports = {
     'plugin:prettier/recommended',
     'plugin:react/recommended',
     'prettier/@typescript-eslint',
+    'plugin:jest/recommended'
     // 'plugin:jsx-a11y/recommended'
   ],
   parser: '@typescript-eslint/parser',
@@ -14,11 +15,18 @@ module.exports = {
     project: './tsconfig.json',
     tsconfigRootDir: __dirname
   },
-  plugins: ['@typescript-eslint', 'react'],
+  plugins: ['@typescript-eslint', 'react', 'jest'],
   env: {
     browser: true,
     node: true,
-    es6: true
+    es6: true,
+    "jest/globals": true
+  },
+  globals: {
+    page: true,
+    browser: true,
+    context: true,
+    jestPuppeteer: true,
   },
   rules: {
     quotes: [2, 'single', { avoidEscape: true }],
