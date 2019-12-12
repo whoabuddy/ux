@@ -53,7 +53,7 @@ const AppIcon: React.FC = ({ ...rest }) => {
   const appName = useSelector((state: IAppState) => selectAppName(state));
   return (
     <Box size={['48px', '78px']} mx="auto" {...rest}>
-      <Image src={appIcon} alt={appName} />
+      <Image src={appIcon} alt={appName} id="app-icon-img" />
     </Box>
   );
 };
@@ -97,6 +97,7 @@ const Intro = ({ next }: { next?: () => void }) => {
         ]}
         action={{
           label: 'Create Data Vault',
+          id: 'create-data-vault-button',
           onClick: () => {
             doTrack(INTRO_CREATE);
             next && next();
@@ -269,11 +270,13 @@ const SecretKey: React.FC<SecretKeyProps> = props => {
               readOnly
               value={secretKey}
               className="hidden-secret-key"
+              id="secret-key-field"
             />
           </Card>,
         ]}
         action={{
           label: 'Copy Secret Key',
+          id: 'copy-secret-key-button',
           onClick: () => {
             doTrack(SECRET_KEY_INTRO_COPIED);
             const input: HTMLInputElement = document.querySelector(
@@ -307,6 +310,7 @@ const SaveKey: React.FC<SaveKeyProps> = ({ next }) => {
       ]}
       action={{
         label: "I've saved it",
+        id: 'saved-key-button',
         onClick: () => {
           doTrack(SECRET_KEY_INSTR_CONFIRMED);
           next();
@@ -336,6 +340,7 @@ const Connect: React.FC<ConnectProps> = props => {
           {/*Validate, track: CONNECT_INCORRECT */}
           <Input
             autoFocus
+            id="secret-key-field"
             minHeight="80px"
             placeholder="12-word Secret Key"
             as="textarea"
@@ -344,6 +349,7 @@ const Connect: React.FC<ConnectProps> = props => {
       ]}
       action={{
         label: 'Continue',
+        id: 'connect-page-continue-button',
         onClick: () => {
           setLoading(true);
           doTrack(CONNECT_SAVED);
@@ -387,12 +393,13 @@ const Final: React.FC<FinalProps> = props => {
     <ScreenTemplate
       textAlign="center"
       before={<AppIcon />}
-      title={`You’re all set! ${appName} has been connected to your Data Vault`}
+      title={`You're all set! ${appName} has been connected to your Data Vault`}
       body={[
         `Everything you do in ${appName} will be private, secure, and only accessible with your Secret Key.`,
       ]}
       action={{
         label: 'Done',
+        id: 'done-auth-button',
         onClick: props.next,
       }}
     />
