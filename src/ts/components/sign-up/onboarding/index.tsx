@@ -22,22 +22,21 @@ import {
   selectAppIcon,
   selectAppName,
 } from '@store/onboarding/selectors';
-import { selectCurrentWallet } from '@store/wallet/selectors';
 import { authenticationInit, finalizeAuthResponse } from '@common/utils';
+import { Wallet } from '@blockstack/keychain';
 
 const RenderScreen = ({ ...rest }) => {
   const dispatch = useDispatch();
-  const { screen, wallet, decodedAuthRequest, authRequest } = useSelector(
+  const { screen, decodedAuthRequest, authRequest } = useSelector(
     (state: IAppState) => ({
       screen: selectCurrentScreen(state),
-      wallet: selectCurrentWallet(state),
       decodedAuthRequest: selectDecodedAuthRequest(state),
       authRequest: selectAuthRequest(state),
     })
   );
 
   // TODO
-  const doFinishSignIn = async () => {
+  const doFinishSignIn = async (wallet: Wallet) => {
     if (!wallet || !decodedAuthRequest || !authRequest) {
       console.log('Uh oh! Finished onboarding without auth info.');
       return;
@@ -116,8 +115,8 @@ const RenderScreen = ({ ...rest }) => {
     case Screen.CONNECTED:
       return (
         <Final
-          next={async () => {
-            await doFinishOnboarding();
+          next={async (wallet: Wallet) => {
+            await doFinishOnboarding(wallet);
           }}
           back={() => dispatch(doChangeScreen(Screen.SECRET_KEY))}
           {...rest}
@@ -129,7 +128,7 @@ const RenderScreen = ({ ...rest }) => {
     case Screen.SIGN_IN:
       return (
         <SignIn
-          next={async () => await doFinishSignIn()}
+          next={async (wallet: Wallet) => await doFinishSignIn(wallet)}
           back={() => {
             dispatch(doChangeScreen(Screen.SECRET_KEY));
           }}
@@ -138,7 +137,11 @@ const RenderScreen = ({ ...rest }) => {
       );
 
     case Screen.RECOVERY_CODE:
-      return <DecryptRecoveryCode next={async () => await doFinishSignIn()} />;
+      return (
+        <DecryptRecoveryCode
+          next={async (wallet: Wallet) => await doFinishSignIn(wallet)}
+        />
+      );
 
     default:
       return <Intro {...rest} />;

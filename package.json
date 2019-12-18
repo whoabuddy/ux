@@ -15,6 +15,7 @@
     "lint:fix": "eslint --ext .ts,.tsx ./src/ -f unix --fix",
     "test": "jest",
     "test:coverage": "jest --collect-coverage",
+    "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit"
   },
   "license": "MIT",
