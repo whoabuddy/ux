@@ -19,16 +19,6 @@ export const authenticationInit = () => {
   return null;
 };
 
-export const getEventSourceWindow = (event: MessageEvent) => {
-  const isWindow =
-    !(event.source instanceof MessagePort) &&
-    !(event.source instanceof ServiceWorker);
-  if (isWindow) {
-    return event.source as Window;
-  }
-  return null;
-};
-
 interface FinalizeAuthParams {
   decodedAuthRequest: DecodedAuthRequest;
   authResponse: string;
@@ -50,11 +40,7 @@ interface FinalizeAuthParams {
  * but using a new tab.
  *
  */
-export const finalizeAuthResponse = ({
-  decodedAuthRequest,
-  authRequest,
-  authResponse
-}: FinalizeAuthParams) => {
+export const finalizeAuthResponse = ({ decodedAuthRequest, authRequest, authResponse }: FinalizeAuthParams) => {
   let didSendMessageBack = false;
   setTimeout(() => {
     if (!didSendMessageBack) {
@@ -65,14 +51,14 @@ export const finalizeAuthResponse = ({
   }, 500);
   window.addEventListener('message', event => {
     if (authRequest && event.data.authRequest === authRequest) {
-      const source = getEventSourceWindow(event);
-      if (source) {
+      const isWindow = !(event.source instanceof MessagePort) && !(event.source instanceof ServiceWorker);
+      if (isWindow) {
         didSendMessageBack = true;
-        source.postMessage(
+        (event.source as Window).postMessage(
           {
             authRequest,
             authResponse,
-            source: 'blockstack-app'
+            source: 'blockstack-app',
           },
           event.origin
         );
