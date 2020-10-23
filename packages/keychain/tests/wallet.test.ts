@@ -2,10 +2,21 @@ import './setup';
 import Wallet, { WalletConfig, ConfigApp } from '../src/wallet';
 import { decrypt } from '../src/encryption/decrypt';
 import { ECPair, bip32 } from 'bitcoinjs-lib';
-import { decryptContent, encryptContent, getPublicKeyFromPrivate } from 'blockstack';
+import { getPublicKeyFromPrivate } from 'blockstack';
+import { encryptECIES, decryptECIES } from 'blockstack/lib/encryption';
 import { DEFAULT_GAIA_HUB } from '../src/utils/gaia';
 import { mnemonicToSeed } from 'bip39';
 import { ChainID } from '@blockstack/stacks-transactions';
+
+const decryptContent = async (content: any, key: string): Promise<string> => {
+  const res = (await decryptECIES(key, content)) as string;
+  return res;
+};
+
+const encryptContent = async (content: string, key: string) => {
+  const encrypted = await encryptECIES(key, Buffer.from(content), true);
+  return JSON.stringify(encrypted);
+};
 
 describe('Restoring a wallet', () => {
   test('restores an existing wallet and keychain', async () => {
@@ -121,7 +132,7 @@ test('returns config if present', async () => {
 
   const wallet = await Wallet.generate('password', ChainID.Testnet);
   const publicKey = getPublicKeyFromPrivate(wallet.configPrivateKey);
-  const encrypted = await encryptContent(JSON.stringify(stubConfig), { publicKey });
+  const encrypted = await encryptContent(JSON.stringify(stubConfig), publicKey);
 
   fetchMock
     .once(
@@ -162,7 +173,7 @@ test('creates a config', async () => {
   const config = await wallet.getOrCreateConfig({ gaiaConfig: hubConfig });
   expect(Object.keys(config.identities[0].apps).length).toEqual(0);
   const { body } = fetchMock.mock.calls[2][1];
-  const decrypted = (await decryptContent(body, { privateKey: wallet.configPrivateKey })) as string;
+  const decrypted = await decryptContent(body, wallet.configPrivateKey);
   expect(JSON.parse(decrypted)).toEqual(config);
 });
 
@@ -196,9 +207,7 @@ test('updates wallet config', async () => {
   });
   expect(fetchMock.mock.calls.length).toEqual(4);
   const body = JSON.parse(fetchMock.mock.calls[3][1].body);
-  const decrypted = (await decryptContent(JSON.stringify(body), {
-    privateKey: wallet.configPrivateKey,
-  })) as string;
+  const decrypted = await decryptContent(JSON.stringify(body), wallet.configPrivateKey);
   const config = JSON.parse(decrypted);
   expect(config).toEqual(wallet.walletConfig);
 });
@@ -224,9 +233,7 @@ test('updates config for reusing id warning', async () => {
   expect(wallet.walletConfig?.hideWarningForReusingIdentity).toBeTruthy();
   expect(fetchMock.mock.calls.length).toEqual(4);
   const body = JSON.parse(fetchMock.mock.calls[3][1].body);
-  const decrypted = (await decryptContent(JSON.stringify(body), {
-    privateKey: wallet.configPrivateKey,
-  })) as string;
+  const decrypted = await decryptContent(JSON.stringify(body), wallet.configPrivateKey);
   const config = JSON.parse(decrypted);
   expect(config.hideWarningForReusingIdentity).toBeTruthy();
 });
@@ -255,7 +262,7 @@ test('restoreIdentities', async () => {
   };
 
   const publicKey = getPublicKeyFromPrivate(wallet.configPrivateKey);
-  const encrypted = await encryptContent(JSON.stringify(stubConfig), { publicKey });
+  const encrypted = await encryptContent(JSON.stringify(stubConfig), publicKey);
   fetchMock.once(encrypted);
 
   const plainTextBuffer = await decrypt(

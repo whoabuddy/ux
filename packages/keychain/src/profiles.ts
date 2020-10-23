@@ -1,9 +1,5 @@
-import {
-  signProfileToken,
-  wrapProfileToken,
-  connectToGaiaHub,
-  makeProfileZoneFile,
-} from 'blockstack';
+import { signProfileToken, wrapProfileToken, makeProfileZoneFile } from 'blockstack';
+import { connectToGaiaHub } from 'blockstack/lib/storage/hub';
 import { IdentityKeyPair } from './utils';
 import { uploadToGaiaHub } from './utils/gaia';
 import Identity from './identity';

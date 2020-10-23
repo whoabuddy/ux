@@ -11,12 +11,9 @@ import {
 } from '../utils';
 import Identity from '../identity';
 import { decrypt } from '../encryption/decrypt';
-import {
-  connectToGaiaHub,
-  encryptContent,
-  getPublicKeyFromPrivate,
-  decryptContent,
-} from 'blockstack';
+import { getPublicKeyFromPrivate } from 'blockstack';
+import { connectToGaiaHub } from 'blockstack/lib/storage/hub';
+import { encryptECIES, decryptECIES } from 'blockstack/lib/encryption';
 import {
   AllowedKeyEntropyBits,
   generateEncryptedMnemonicRootKeychain,
@@ -232,10 +229,8 @@ export class Wallet {
       const response = await fetch(
         `${gaiaConfig.url_prefix}${gaiaConfig.address}/wallet-config.json`
       );
-      const encrypted = await response.text();
-      const configJSON = (await decryptContent(encrypted, {
-        privateKey: this.configPrivateKey,
-      })) as string;
+      const encrypted = await response.json();
+      const configJSON = (await decryptECIES(this.configPrivateKey, encrypted)) as string;
       const config: WalletConfig = JSON.parse(configJSON);
       this.walletConfig = config;
       return config;
@@ -274,8 +269,12 @@ export class Wallet {
 
   async updateConfig(gaiaConfig: GaiaHubConfig): Promise<void> {
     const publicKey = getPublicKeyFromPrivate(this.configPrivateKey);
-    const encrypted = await encryptContent(JSON.stringify(this.walletConfig), { publicKey });
-    await uploadToGaiaHub('wallet-config.json', encrypted, gaiaConfig);
+    const encrypted = await encryptECIES(
+      publicKey,
+      Buffer.from(JSON.stringify(this.walletConfig)),
+      true
+    );
+    await uploadToGaiaHub('wallet-config.json', JSON.stringify(encrypted), gaiaConfig);
   }
 
   async updateConfigWithAuth({
