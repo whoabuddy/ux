@@ -52,7 +52,7 @@ export interface ContractCallBase extends TxBase {
 export interface ContractCallOptions extends ContractCallBase {
   authOrigin?: string;
   userSession?: UserSession;
-  /** DEPRECATED: use `onFinish` */
+  /** @deprecated use `onFinish` */
   finished?: (data: FinishedTxData) => void;
   onFinish?: (data: FinishedTxData) => void;
 }
@@ -79,7 +79,7 @@ export interface ContractDeployBase extends TxBase {
 export interface ContractDeployOptions extends ContractDeployBase {
   authOrigin?: string;
   userSession?: UserSession;
-  /** DEPRECATED: use `onFinish` */
+  /** @deprecated use `onFinish` */
   finished?: (data: FinishedTxData) => void;
   onFinish?: (data: FinishedTxData) => void;
 }
@@ -102,7 +102,7 @@ export interface STXTransferBase extends TxBase {
 export interface STXTransferOptions extends STXTransferBase {
   authOrigin?: string;
   userSession?: UserSession;
-  /** DEPRECATED: use `onFinish` */
+  /** @deprecated use `onFinish` */
   finished?: (data: FinishedTxData) => void;
   onFinish?: (data: FinishedTxData) => void;
 }

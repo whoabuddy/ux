@@ -32,6 +32,11 @@ export const useConnect = () => {
     return dispatch({ type: States.UPDATE_AUTH_OPTIONS, payload });
   };
 
+  /**
+   *
+   * @param signIn Whether the user should be sent to sign in
+   * @param options
+   */
   const doOpenAuth = (signIn?: boolean, options?: Partial<AuthOptions>) => {
     if (signIn) {
       const _options: AuthOptions = {
